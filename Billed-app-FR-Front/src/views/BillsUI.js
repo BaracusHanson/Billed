@@ -20,13 +20,12 @@ const row = (bill) => {
 };
 
 const rows = (data) => {
-  console.log("data", data);
-  const datasFiltered = data.sort((a, b) => {
-    return new Date(a.date) - new Date(b.date);
-  });
-  return datasFiltered && datasFiltered.length
-    ? datasFiltered.map((bill) => row(bill)).join("")
-    : "";
+  if (!data || !Array.isArray(data)) {
+    return []; // Retourne une chaîne vide si `data` est indéfini ou n'est pas un tableau
+  }
+  data.sort((a, b) => (a.date < b.date ? 1 : -1));
+
+  return data && data.length ? data.map((bill) => row(bill)).join("") : "";
 };
 
 export default ({ data: bills, loading, error }) => {
