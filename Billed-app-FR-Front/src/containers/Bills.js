@@ -36,40 +36,33 @@ export default class {
   };
 
   getBills = () => {
-    return this.store
+    if (this.store) {
+      return this.store
       .bills()
       .list()
-      .then((snapshot) => {
-        const bills = snapshot.map((doc) => {
-          // console.log(doc.date);
-          try {
-            const rawDate = new Date(doc.date);
-            if (isNaN(rawDate.getTime())) throw new Error("Invalid date");
-
-            return {
-              ...doc,
-              date: formatDate(doc.date),
-              rawDate,
-              status: formatStatus(doc.status),
-            };
-          } catch (e) {
-            console.error("Error processing bill:", e, doc);
-            return {
-              ...doc,
-              date: "Invalid Date",
-              rawDate: new Date(0),
-              status: formatStatus(doc.status),
-            };
-          }
-        });
-
-        // Tri **ascendant** (du plus ancien au plus récent)
-        bills.sort((a, b) => b.rawDate.getTime() - a.rawDate.getTime());
-
-        console.log("Sorted bills:", bills);
-        console.log("Total bills:", bills.length);
-
-        return bills;
-      });
-  };
+      .then(snapshot => {
+        const bills = snapshot
+          .map(doc => {
+            try {
+              return {
+                ...doc,
+                date: formatDate(doc.date),
+                status: formatStatus(doc.status)
+              }
+            } catch(e) {
+              // if for some reason, corrupted data was introduced, we manage here failing formatDate function
+              // log the error and return unformatted date in that case
+              console.log(e,'for',doc)
+              return {
+                ...doc,
+                date: doc.date,
+                status: formatStatus(doc.status)
+              }
+            }
+          })
+          console.log('length', bills.length)
+        return bills
+      })
+    }
+  }
 }

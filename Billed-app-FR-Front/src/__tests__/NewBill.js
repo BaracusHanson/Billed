@@ -87,8 +87,6 @@ describe("Given I am connected as an employee", () => {
     });
 
     test("Then submitting a valid bill should call the API and navigate", async () => {
-
-      
       localStorage.setItem(
         "user",
         JSON.stringify({ email: "employee@test.tld" })
@@ -237,7 +235,64 @@ describe("Given I am connected as an employee", () => {
         "Tous les champs obligatoires doivent être remplis."
       );
     });
+  });
 
+  describe("When I submit a valid new bill", () => {
+    test("Then it should send a POST request to the API and navigate to the Bills page", async () => {
+      // Simule un utilisateur connecté
+      localStorage.setItem(
+        "user",
+        JSON.stringify({ email: "employee@test.tld" })
+      );
+
+      document.body.innerHTML = NewBillUI();
+      const onNavigate = jest.fn();
+
+      const newBill = new NewBill({
+        document,
+        onNavigate,
+        store: mockStore,
+        localStorage: window.localStorage,
+      });
+
+      // Remplir le formulaire avec des données valides
+      fireEvent.input(screen.getByTestId("expense-name"), {
+        target: { value: "Restaurant" },
+      });
+      fireEvent.input(screen.getByTestId("amount"), {
+        target: { value: "50" },
+      });
+      fireEvent.input(screen.getByTestId("datepicker"), {
+        target: { value: "2024-02-10" },
+      });
+      fireEvent.change(screen.getByTestId("expense-type"), {
+        target: { value: "Transport" },
+      });
+
+      const fileInput = screen.getByTestId("file");
+      const validFile = new File(["image"], "test.png", { type: "image/png" });
+
+      Object.defineProperty(fileInput, "files", {
+        value: [validFile],
+      });
+
+      fireEvent.change(fileInput);
+
+      // Soumission du formulaire
+      const handleSubmit = jest.fn(newBill.handleSubmit);
+      const form = screen.getByTestId("form-new-bill");
+      form.addEventListener("submit", handleSubmit);
+      fireEvent.submit(form);
+
+      // **PARTIE POST : Vérification de l'appel à l'API**
+      await waitFor(() => expect(mockStore.bills().create).toHaveBeenCalled());
+      expect(mockStore.bills().create).toHaveBeenCalledWith({
+        data: expect.any(FormData),
+        headers: { noContentType: true },
+      });
+
+      // Vérification de la navigation
+      expect(onNavigate).toHaveBeenCalledWith(ROUTES.Bills);
+    });
   });
 });
-

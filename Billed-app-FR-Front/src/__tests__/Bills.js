@@ -16,6 +16,8 @@ import router from "../app/Router.js";
 jest.mock("../app/store", () => mockStore); // Mock du store pour éviter les requêtes réseau
 
 describe("Given I am connected as an employee", () => {
+  // expect attendi ici
+
   describe("When I am on Bills Page", () => {
     test("Then bill icon in vertical layout should be highlighted", async () => {
       // Simule l'utilisateur connecté
@@ -49,7 +51,7 @@ describe("Given I am connected as an employee", () => {
           /^(19|20)\d\d[- /.](0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])$/i
         )
         .map((a) => a.innerHTML);
-
+      console.log(dates);
       // Vérifie que les dates sont triées du plus récent au plus ancien
       const antiChrono = (a, b) => (a < b ? 1 : -1);
       const datesSorted = [...dates].sort(antiChrono);
